@@ -60,7 +60,7 @@ class Filer:
         """
         Equivalent to 'cifs homedir' on the CLI.
 
-        Returns an array of cifs home directory paths
+        Return an array of cifs home directory paths.
         """
 
         out = self.invoke('cifs-homedir-paths-get')
@@ -175,6 +175,17 @@ class Filer:
             raise OntapApiException(out.results_errno(), out.results_reason())
         return out
 
+    def set_cifs_homedirs(self, homedirs):
+        """Set the list of CIFS home directory paths for the filer."""
+
+        homedir_paths = NaElement('homedir-paths')
+
+        for d in homedirs:
+            homedir_paths.child_add(NaElement('homedir-path-info', d))
+
+        chps = NaElement('cifs-homedir-paths-set')
+        chps.child_add(homedir_paths)
+        self.invoke_elem(chps)
 
     def set_option(self, option, value):
         """Equivalent to 'options <option> <value>' on the CLI."""
