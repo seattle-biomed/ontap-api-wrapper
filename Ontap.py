@@ -56,6 +56,23 @@ class Filer:
         else:
             return False
 
+    def get_cifs_homedirs(self):
+        """
+        Equivalent to 'cifs homedir' on the CLI.
+
+        Returns an array of cifs home directory paths
+        """
+
+        out = self.invoke('cifs-homedir-paths-get')
+
+        if out.has_children():
+            homedirs = []
+            for d in out.child_get('homedir-paths').children_get():
+                homedirs.append(d.element['content'])
+            return homedirs
+        else:
+            return []
+
     def get_export(self, export_path):
         """
         Return an Export object representing NFS share at export_path.
