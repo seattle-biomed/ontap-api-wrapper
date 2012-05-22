@@ -559,7 +559,6 @@ class FlexVol:
             if qtree.child_get_string('qtree') == '':
                 return qtree.child_get_string('security-style')
 
-
     def get_sis_state(self):
         """Get deduplication state; return 'Enabled' or 'Disabled'."""
         try:
