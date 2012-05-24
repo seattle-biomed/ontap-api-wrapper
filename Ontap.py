@@ -1,3 +1,4 @@
+import re
 import sys
 
 from NaElement import NaElement
@@ -900,3 +901,47 @@ class FlexVol:
                           'volume-name', self.name,
                           'schedule-name', schedule)
         
+
+class Share:
+    """A CIFS share on a NetApp filer."""
+
+    def __init__(self, filer, name):
+        self.filer = filer
+        self.name = name
+
+    def configured(self):
+        """
+        Determind if a share named self.name has been configured on filer.
+
+        Return boolean.
+        """
+
+        output = self._get_cifs_shares()
+
+        # Look for message on third line of output:
+        if re.match('^No share is matching that name\.', output):
+            return False
+        else:
+            return True
+
+    def get_mount_point(self):
+        """Return a share's mount point."""
+
+        config = self._get_cifs_shares().splitlines()[0]
+
+        m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
+
+        return m.groups()[1]
+
+    def _get_cifs_shares(self):
+        """
+        Return the raw CLI output from 'cifs shares <self.name>'.
+
+        The first two header lines are stripped.
+        """
+        
+        out = self.filer.invoke_cli('cifs', 'shares', self.name)
+
+        output = out.child_get('cli-output').element['content'].splitlines()
+
+        return '\n'.join(output[2:])
