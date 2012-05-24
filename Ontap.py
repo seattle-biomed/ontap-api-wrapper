@@ -85,6 +85,18 @@ class Filer:
             return(Export(self, export_path))
         else:
             return False
+
+    def get_share(self, name):
+        """
+        Return a Share object representing the existing CIFS share of name.
+
+        If share does not exist, return False.
+        """
+
+        if self.has_share(name):
+            return(Share(self, name))
+        else:
+            return False   
     
     def get_exports(self):
         """Return a list of Export objects of filer's configured NFS shares."""
@@ -130,6 +142,12 @@ class Filer:
 
         export = Export(self, path)
         return export.configured()
+
+    def has_share(self, name):
+        """Check if filer has CIFS share name; return boolean."""
+
+        share = Share(self, name)
+        return share.configured()
 
     def has_volume(self, name):
         """Check if filer has FlexVol name; return boolean."""
@@ -917,20 +935,75 @@ class Share:
         """
 
         output = self._get_cifs_shares()
-
-        # Look for message on third line of output:
         if re.match('^No share is matching that name\.', output):
             return False
         else:
             return True
 
+    def get_acl(self):
+        """Return a dict containing the ACLs for a share."""
+
+        output = self._get_cifs_shares()
+        acl_lines = output.splitlines()[1:]
+
+        acls = {}
+        for line in acl_lines:
+            if re.match(r'^\s+\.\.\.', line):
+                continue # It's an option line, not an ACL line
+            m = re.match(r'^\s+(.*) / (Full Control|Change|Read)$', line)
+            acls[m.groups()[0]] = m.groups()[1]
+
+        return acls
+
+    def get_description(self):
+        """
+        Return a share's description.
+
+        If the description is not set, return False.
+        """
+
+        config = self._get_cifs_shares().splitlines()[0]
+        m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
+        if m:
+            return m.groups()[2]
+        else:
+            return False
+
+    def get_dir_umask(self):
+        """
+        Return the 'dir_umask' setting for a share.
+
+        If 'dir_umask' is not set, return False.
+        """
+
+        pattern = re.compile(r'^\s+\.\.\. dir_umask=(.*)$')
+        return self._get_option(pattern)
+
+    def get_file_umask(self):
+        """
+        Return the 'file_umask' setting for a share.
+
+        If 'file_umask' is not set, return False.
+        """
+
+        pattern = re.compile(r'^\s+\.\.\. file_umask=(.*)$')
+        return self._get_option(pattern)
+
+    def get_forcegroup(self):
+        """
+        Return the 'forcegroup' setting for a share.
+
+        If 'forcegroup' is not set, return False.
+        """
+
+        pattern = re.compile(r'^\s+\.\.\. forcegroup=(.*)$')
+        return self._get_option(pattern)
+
     def get_mount_point(self):
         """Return a share's mount point."""
 
         config = self._get_cifs_shares().splitlines()[0]
-
         m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
-
         return m.groups()[1]
 
     def _get_cifs_shares(self):
@@ -945,3 +1018,19 @@ class Share:
         output = out.child_get('cli-output').element['content'].splitlines()
 
         return '\n'.join(output[2:])
+
+    def _get_option(self, pattern):
+        """
+        Search the _get_cifs_shares output for a CIFS option and return it.
+
+        If option is not set, return False.
+        """
+
+        output = self._get_cifs_shares()
+        option_lines = output.splitlines()[1:]
+
+        for line in option_lines:
+            m = pattern.match(line)
+            if m:
+                return m.groups()[0]
+        return False
