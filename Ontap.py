@@ -940,6 +940,30 @@ class Share:
         else:
             return True
 
+    def create(self, mount_point, description=False, forcegroup=False,
+               dir_umask=False, file_umask=False, umask=False):
+        """Equivalent to 'cifs shares -add mount_point' on the CLI."""
+
+        command = ['cifs', 'shares', '-add', self.name, mount_point]
+        if description:
+            command.append('-comment')
+            command.append(description)
+        if forcegroup:
+            command.append('-forcegroup')
+            command.append(forcegroup)
+        if dir_umask:
+            command.append('-dir_umask')
+            command.append(dir_umask)
+        if file_umask:
+            command.append('-file_umask')
+            command.append(file_umask)
+        if umask:
+            command.append('-umask')
+            command.append(umask)
+
+        print command
+        self.filer.invoke_cli(*command)
+
     def get_acl(self):
         """Return a dict containing the ACLs for a share."""
 
