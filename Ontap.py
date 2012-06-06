@@ -961,7 +961,6 @@ class Share:
             command.append('-umask')
             command.append(umask)
 
-        print command
         self.filer.invoke_cli(*command)
 
     def get_acl(self):
