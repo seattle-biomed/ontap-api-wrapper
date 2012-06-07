@@ -963,7 +963,13 @@ class Share:
 
         self.filer.invoke_cli(*command)
 
-    def get_acl(self):
+    def del_access(self, user, rights):
+        """CLI equivalent to 'cifs access -delete self.name <user>'."""
+
+        out = self.filer.invoke_cli('cifs', 'access', '-delete', self.name,
+                                    user)
+
+    def get_access(self):
         """Return a dict containing the ACLs for a share."""
 
         output = self._get_cifs_shares()
@@ -1028,6 +1034,11 @@ class Share:
         config = self._get_cifs_shares().splitlines()[0]
         m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
         return m.groups()[1]
+
+    def set_access(self, user, rights):
+        """CLI equivalent to 'cifs access share <user> <rights>'."""
+
+        out = self.filer.invoke_cli('cifs', 'access', self.name, user, rights)
 
     def _get_cifs_shares(self):
         """
