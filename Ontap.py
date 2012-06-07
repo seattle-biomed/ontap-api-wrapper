@@ -1060,6 +1060,30 @@ class Share:
         m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
         return m.groups()[1]
 
+    def modify(self, description=False, forcegroup=False, dir_umask=False,
+               file_umask=False, umask=False):
+        """Equivalend to 'cifs shares -change ...' on the CLI."""
+
+        command = ['cifs', 'shares', '-change', self.name]
+
+        if description:
+            command.append('-comment')
+            command.append(description)
+        if forcegroup:
+            command.append('-forcegroup')
+            command.append(forcegroup)
+        if dir_umask:
+            command.append('-dir_umask')
+            command.append(dir_umask)
+        if file_umask:
+            command.append('-file_umask')
+            command.append(file_umask)
+        if umask:
+            command.append('-umask')
+            command.append(umask)
+
+        self.filer.invoke_cli(*command)
+
     def set_access(self, user, rights):
         """CLI equivalent to 'cifs access share <user> <rights>'."""
 
