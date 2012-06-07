@@ -1060,6 +1060,16 @@ class Share:
         m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
         return m.groups()[1]
 
+    def get_umask(self):
+        """
+        Return the 'umask' setting for a share.
+
+        If 'umask' is not set, return False.
+        """
+
+        pattern = re.compile(r'^\s+\.\.\. umask=(.*)$')
+        return self._get_option(pattern)
+
     def modify(self, description=False, forcegroup=False, dir_umask=False,
                file_umask=False, umask=False):
         """Equivalend to 'cifs shares -change ...' on the CLI."""
