@@ -333,7 +333,6 @@ class Export:
 
         # Execute rule change:
         self.filer.invoke_elem(nfs_export)
-        
 
     def delete_rule(self):
         """Remove the exportfs rule for a share."""
