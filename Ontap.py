@@ -987,7 +987,7 @@ class Share:
 
         self.filer.invoke_cli(*command)
 
-    def del_access(self, user, rights):
+    def del_access(self, user):
         """CLI equivalent to 'cifs access -delete self.name <user>'."""
 
         out = self.filer.invoke_cli('cifs', 'access', '-delete', self.name,
@@ -1004,7 +1004,8 @@ class Share:
             if re.match(r'^\s+\.\.\.', line):
                 continue # It's an option line, not an ACL line
             m = re.match(r'^\s+(.*) / (Full Control|Change|Read)$', line)
-            acls[m.groups()[0]] = m.groups()[1]
+            if m:
+                acls[m.groups()[0]] = m.groups()[1]
 
         return acls
 
