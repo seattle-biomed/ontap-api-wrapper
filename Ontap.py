@@ -111,6 +111,30 @@ class Filer:
         else:
             return False   
     
+    def get_shares(self):
+        """Return a list of Share objects containing filer's CIFS exports."""
+
+        out = self.invoke_cli('cifs', 'shares')
+
+        # Pattern of output is two header lines, followed by each share name
+        # starting at the left-hand side of the output.  Regexp accounts
+        # For share name being able to include whitespace and other
+        # characters - match is anchored on first "/" following whitespace,
+        # which is presumed to be the start of the mount point.
+
+        output = out.child_get('cli-output').element['content'].splitlines()
+
+        share_pattern = re.compile(r'^([a-zA-Z].*\S)\s+\/')
+
+        shares = []
+        
+        for line in output[2:]:
+            m = share_pattern.match(line)
+            if m:
+                shares.append(Share(self, m.groups()[0]))
+
+        return shares
+
     def get_option(self, name):
         """Equivalent to 'options <name>' on the CLI."""
 
@@ -934,7 +958,7 @@ class Share:
         Return boolean.
         """
 
-        output = self._get_cifs_shares()
+        output = self._get_cifs_share()
         if re.match('^No share is matching that name\.', output):
             return False
         else:
@@ -972,7 +996,7 @@ class Share:
     def get_access(self):
         """Return a dict containing the ACLs for a share."""
 
-        output = self._get_cifs_shares()
+        output = self._get_cifs_share()
         acl_lines = output.splitlines()[1:]
 
         acls = {}
@@ -991,7 +1015,7 @@ class Share:
         If the description is not set, return False.
         """
 
-        config = self._get_cifs_shares().splitlines()[0]
+        config = self._get_cifs_share().splitlines()[0]
         m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
         if m:
             return m.groups()[2]
@@ -1031,7 +1055,7 @@ class Share:
     def get_mount_point(self):
         """Return a share's mount point."""
 
-        config = self._get_cifs_shares().splitlines()[0]
+        config = self._get_cifs_share().splitlines()[0]
         m = re.match(r'^(.*\S)\s+(/\S*)\s+(.*)$', config)
         return m.groups()[1]
 
@@ -1040,7 +1064,7 @@ class Share:
 
         out = self.filer.invoke_cli('cifs', 'access', self.name, user, rights)
 
-    def _get_cifs_shares(self):
+    def _get_cifs_share(self):
         """
         Return the raw CLI output from 'cifs shares <self.name>'.
 
@@ -1055,12 +1079,12 @@ class Share:
 
     def _get_option(self, pattern):
         """
-        Search the _get_cifs_shares output for a CIFS option and return it.
+        Search the _get_cifs_share output for a CIFS option and return it.
 
         If option is not set, return False.
         """
 
-        output = self._get_cifs_shares()
+        output = self._get_cifs_share()
         option_lines = output.splitlines()[1:]
 
         for line in option_lines:
