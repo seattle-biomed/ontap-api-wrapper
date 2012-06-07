@@ -235,7 +235,6 @@ class Filer:
 
         self.invoke('options-set', 'name', option, 'value', value)
 
-
     def _xmltree_to_dict(self, out, int_values=(), key='name', value='value'):
         """Convert thinly-veiled XML from ONTAP API to a dict."""
         options = {}
@@ -248,7 +247,6 @@ class Filer:
                 options[name] = option.child_get_string(value)
 
         return options
-
 
     def _xmltree_to_list(self, nae, outer_name, inner_name):
         """
