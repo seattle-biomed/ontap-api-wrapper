@@ -86,18 +86,6 @@ class Filer:
         else:
             return False
 
-    def get_share(self, name):
-        """
-        Return a Share object representing the existing CIFS share of name.
-
-        If share does not exist, return False.
-        """
-
-        if self.has_share(name):
-            return(Share(self, name))
-        else:
-            return False   
-    
     def get_exports(self):
         """Return a list of Export objects of filer's configured NFS shares."""
 
@@ -111,6 +99,18 @@ class Filer:
 
         return exports                         
 
+    def get_share(self, name):
+        """
+        Return a Share object representing the existing CIFS share of name.
+
+        If share does not exist, return False.
+        """
+
+        if self.has_share(name):
+            return(Share(self, name))
+        else:
+            return False   
+    
     def get_option(self, name):
         """Equivalent to 'options <name>' on the CLI."""
 
