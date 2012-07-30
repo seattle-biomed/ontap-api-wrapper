@@ -918,6 +918,28 @@ class FlexVol:
 
         self.filer.invoke_elem(nae)
 
+    def snapshot_create(self, snap_name):
+        """Equivalent to 'snap create <self.name> <snap_name>'."""
+
+        self.filer.invoke('snapshot-create',
+                          'volume', self.name,
+                          'snapshot', snap_name)
+
+    def snapshot_delete(self, snap_name):
+        """Equivalent to 'snap delete <self.name> <snap_name>'."""
+
+        self.filer.invoke('snapshot-delete',
+                          'volume', self.name,
+                          'snapshot', snap_name)
+
+    def snapshot_rename(self, current_name, new_name):
+        """Equivalent to 'snap rename <self.name> <current_name> <new_name>'"""
+
+        self.filer.invoke('snapshot-rename',
+                          'volume', self.name,
+                          'current-name', current_name,
+                          'new-name', new_name)
+
     def snapvault_primary_snap(self, schedule):
         """
         Equivalent to 'snapvault snap create <self.name> <schedule>'
