@@ -736,6 +736,19 @@ class FlexVol:
 
         return scheds        
 
+    def has_snap(self, snap_name):
+        """Return boolean of whether FlexVol has snapshot 'snap_name'."""
+
+        out = self.filer.invoke('snapshot-list-info',
+                                'target-name', self.name,
+                                'target-type', 'volume')
+
+        for s in out.child_get('snapshots').children_get():
+            if s.child_get_string('name') == snap_name:
+                return True
+
+        return False
+
     def set_autosize_state(self,
                            enabled,
                            increment_size = False,
