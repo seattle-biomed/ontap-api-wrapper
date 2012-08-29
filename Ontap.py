@@ -557,6 +557,22 @@ class FlexVol:
         kb = self.get_autosize_max_size()
         return str(int(round(kb / 1024. / 1024.))) + 'g'
     
+    def get_df(self):
+        """
+        Return an array containing space used, available and total space.
+
+        Values are returned as integers, representing bytes.
+        """
+
+        out = self.filer.invoke('volume-list-info', 'volume', self.name)
+        used = out.child_get('volumes').child_get(
+            'volume-info').child_get_int('size-used')
+        avail = out.child_get('volumes').child_get(
+            'volume-info').child_get_int('size-available')
+        total = out.child_get('volumes').child_get(
+            'volume-info').child_get_int('size-total')
+        return([used, avail, total])
+
     def get_options(self):
         """Equivalent to: vol options <self.name>
 
