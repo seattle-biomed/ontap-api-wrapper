@@ -99,6 +99,12 @@ class Filer:
 
         return exports                         
 
+    def get_root_name(self):
+        """Return a string containing the Filer's root volume's name."""
+
+        out = self.invoke('aggr-get-root-name')
+        return out.child_get_string('root-volume')
+
     def get_share(self, name):
         """
         Return a Share object representing the existing CIFS share of name.
