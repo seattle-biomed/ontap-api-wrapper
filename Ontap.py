@@ -567,7 +567,9 @@ class FlexVol:
         """
         Return an array containing space used, available and total space.
 
-        Values are returned as integers, representing bytes.
+        Values are returned as integers, representing bytes.  Note
+        that values for total space are after snapshot reserve (if
+        any), similar to how 'df' works on the CLI.
         """
 
         out = self.filer.invoke('volume-list-info', 'volume', self.name)
