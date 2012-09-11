@@ -497,6 +497,10 @@ class FlexVol:
 
     def __init__(self, filer, name):
         self.filer = filer
+
+        m = re.match('^/vol/(.+)$', name):
+            name = m.groups()[0]
+
         self.name = name
         self.path = '/vol/' + name
     
