@@ -102,8 +102,12 @@ class Filer:
     def get_fs_status_msg(self):
         """Return a string containing the file system status message."""
 
-        out = self.invoke('snmp-get',
-                          'object-id', '.1.3.6.1.4.1.789.1.5.7.2.0')
+        return self.get_oid('.1.3.6.1.4.1.789.1.5.7.2.0')
+
+    def get_oid(self, oid):
+        """Return a generic OID from the NetApp SNMP MIB."""
+
+        out = self.invoke('snmp-get', 'object-id', oid)
         return out.child_get_string('value')
 
     def get_root_name(self):
@@ -839,6 +843,27 @@ class FlexVol:
             self.filer.invoke('sis-disable', 'path', self.path)
         else:
             raise OntapException('Unknown sis state.')
+
+    def set_size(self, size):
+        """
+        Set a FlexVol's capacity according to argument size.
+
+        Argument size is a string that follows the same semantics as
+        the underlying ONTAP API: 'Specify the flexible volume's new
+        size using the following format: [+|-]< number > k|m|g|t] If a
+        leading '+' or '-' appears, it indicates that the given
+        flexible volume's size is to be increased or decreased
+        (respectively) by the indicated amount, else the amount is the
+        absolute size to set. The optional trailing 'k', 'm', 'g', and
+        't' indicates the desired units, namely 'kilobytes',
+        'megabytes', 'gigabytes', and 'terabytes' (respectively). If
+        the trailing unit character doesn't appear, then < number > is
+        interpreted as the number of kilobytes desired.'
+        """
+        
+        self.filer.invoke('volume-size',
+                          'new-size', size,
+                          'volume', self.name)
 
     def set_snap_autodelete_option(self, option_name, value):
         """Equivalent to 'snap autodelete <self.name> <option_name> <value>'
