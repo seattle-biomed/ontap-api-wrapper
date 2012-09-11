@@ -99,6 +99,13 @@ class Filer:
 
         return exports                         
 
+    def get_fs_status_msg(self):
+        """Return a string containing the file system status message."""
+
+        out = self.invoke('snmp-get',
+                          'object-id', '.1.3.6.1.4.1.789.1.5.7.2.0')
+        return out.child_get_string('value')
+
     def get_root_name(self):
         """Return a string containing the Filer's root volume's name."""
 
