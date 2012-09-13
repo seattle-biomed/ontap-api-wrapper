@@ -283,6 +283,14 @@ class Filer:
                     out_list.append(inner_val)
 
         return out_list
+
+
+class Aggr:
+    """An aggregate on a NetApp filer."""
+
+    def __init__(self, filer, name):
+        self.filer = filer
+        self.name = name
         
 
 class Export:
