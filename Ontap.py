@@ -291,6 +291,48 @@ class Aggr:
     def __init__(self, filer, name):
         self.filer = filer
         self.name = name
+
+    def get_space(self):
+
+        out = self.filer.invoke('aggr-list-info', 'aggregate', self.name)
+        space_info = out.child_get('aggregates').child_get('aggr-info').child_get('aggregate-space-details').child_get('aggregate-space-info').child_get('aggregate-space').child_get('fs-space-info')
+
+        return self.parse_space_info(space_info)
+
+    def parse_space_info(self, space_info):
+        """Parse ONTAP fs-space-info, return dict with contents."""
+
+        info = {}
+        info['fs-size-total'] = space_info.child_get_int('fs-size-total')
+        info['fs-size-used'] = space_info.child_get_int('fs-size-used')
+        info['fs-size-available'] = space_info.child_get_int(
+            'fs-size-available')
+        info['fs-percent-used-capacity'] = space_info.child_get_int(
+            'fs-percent-used-capacity')
+        info['fs-files-total'] = space_info.child_get_int('fs-files-total')
+        info['fs-files-used'] = space_info.child_get_int('fs-files-used')
+        info['fs-percent-inode-used-capacity'] = space_info.child_get_int(
+            'fs-percent-inode-used-capacity')
+        info['fs-maxfiles-available'] = space_info.child_get_int(
+            'fs-maxfiles-available')
+        info['fs-maxfiles-used'] = space_info.child_get_int(
+            'fs-maxfiles-used')
+        info['fs-maxfiles-possible'] = space_info.child_get_int(
+            'fs-maxfiles-possible')
+        info['fs-files-private-used'] = space_info.child_get_int(
+            'fs-files-private-used')
+        info['fs-inodefile-public-capacity'] = space_info.child_get_int(
+            'fs-inodefile-public-capacity')
+        info['fs-inodefile-private-capacity'] = space_info.child_get_int(
+            'fs-inodefile-private-capacity')
+        info['fs-sis-percent-saved'] = space_info.child_get_int(
+            'fs-sis-percent-saved')
+        info['fs-sis-shared-space'] = space_info.child_get_int(
+            'fs-sis-shared-space')
+        info['fs-sis-saved-space'] = space_info.child_get_int(
+            'fs-sis-saved-space')
+
+        return info
         
 
 class Export:
