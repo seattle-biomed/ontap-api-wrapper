@@ -32,6 +32,9 @@ class Filer:
         out = self.invoke('system-get-version')
         self.version = out.child_get_string('version')
 
+        # Used for caching performance object descriptions:
+        self.perf_obj_info = {}
+
     def create_volume(self, name, aggr, size):
         v = FlexVol(self, name)
         v.create(aggr, size)
@@ -109,6 +112,96 @@ class Filer:
 
         out = self.invoke('snmp-get', 'object-id', oid)
         return out.child_get_string('value')
+
+    def get_perf_object(self, objectname):
+        """Return objectname's performance data in a dict tree."""
+
+        info = self.get_perf_object_info(objectname)
+        out = self.invoke('perf-object-get-instances-iter-start',
+                          'objectname', objectname)
+        iter_tag = out.child_get_int('tag')
+        iter_recs = out.child_get_int('records')
+
+        perf_insts = {}
+        i = 0
+        while i < iter_recs:
+            out = self.invoke('perf-object-get-instances-iter-next',
+                              'maximum', 1,
+                              'tag', iter_tag)
+            inst = out.child_get('instances').child_get('instance-data')
+            inst_name = inst.child_get_string('name')
+            perf_insts[inst_name] = {}
+            counters = inst.child_get('counters').children_get()
+            for c in counters:
+                name = c.child_get_string('name')
+                if info[name]['type'] == 'array':
+                    vals = c.child_get_string('value').split(',')
+                    data = {}
+                    j = 0
+                    while j < len(vals):
+                        data[info[name]['labels'][j]] = vals[j]
+                        j = j + 1
+                    perf_insts[inst_name][name] = data
+                else:
+                    try:
+                        perf_insts[inst_name][name] = c.child_get_int('value')
+                    except ValueError:
+                        # Must be a string...
+                        perf_insts[inst_name][name] = c.child_get_string(
+                            'value')
+                
+            i = i + 1
+
+        self.invoke('perf-object-get-instances-iter-end', 'tag', iter_tag)
+        return perf_insts
+
+    def get_perf_object_info(self, objectname):
+        """
+        Return dict of static information about perf counter 'objectname'.
+
+        Information is returned as a dict of dicts.
+        """
+
+        # Check cache:
+        if self.perf_obj_info.has_key(objectname):
+            return self.perf_obj_info[objectname]
+        
+        out = self.invoke('perf-object-counter-list-info',
+                          'objectname', objectname)
+        counters = {}
+        for counter in out.child_get('counters').children_get():
+            name = counter.child_get_string('name')
+            counters[name] = {}
+            counters[name]['desc'] = counter.child_get_string('desc')
+            counters[name]['privilege-level'] = counter.child_get_string(
+                'privilege-level')
+
+            ## Handle optional keys:
+            for opt_key in ('base-counter', 'properties', 'type', 'unit'):
+                opt_val = counter.child_get_string(opt_key)
+                if opt_val:
+                    counters[name][opt_key] = opt_val
+                elif opt_key == 'type':
+                    counters[name]['type'] = 'scalar'
+
+            labels = counter.child_get('labels')
+            if labels:
+                counters[name]['labels'] = labels.child_get_string(
+                    'label-info').split(',')
+
+        # Store info in cache and return
+        self.perf_obj_info[objectname] = counters
+        return counters
+
+    def get_perf_object_list(self):
+        """Return dict of filer performance object names and privileges."""
+
+        out = self.invoke('perf-object-list-info')
+        objs = {}
+        for obj in out.child_get('objects').children_get():
+            objs[obj.child_get_string('name')] = obj.child_get_string(
+                'privilege-level')
+        return objs
 
     def get_root_name(self):
         """Return a string containing the Filer's root volume's name."""
