@@ -139,7 +139,7 @@ class Filer:
                     data = {}
                     j = 0
                     while j < len(vals):
-                        data[info[name]['labels'][j]] = vals[j]
+                        data[info[name]['labels'][j]] = int(vals[j])
                         j = j + 1
                     perf_insts[inst_name][name] = data
                 else:
