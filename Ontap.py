@@ -113,27 +113,34 @@ class Filer:
         out = self.invoke('snmp-get', 'object-id', oid)
         return out.child_get_string('value')
 
-    def get_perf_object(self, objectname, read=[]):
+    def get_perf_object(self, objectname, read=[], instances=[]):
         """
         Return objectname's performance data in a dict tree.
 
         read - optional array of counters whose values are to be read.
                If not set, all counters are reported.
+        instances - optional array of instances whose values are to be read.
+                    If not set, all instances are reported.
         """
 
         info = self.get_perf_object_info(objectname)
+
+        get_perf_obj = NaElement('perf-object-get-instances-iter-start')
+        get_perf_obj.child_add(NaElement('objectname', objectname))
 
         if read:
             read_counters = NaElement('counters')
             for c in read:
                 read_counters.child_add(NaElement('counter', c))
-            get_perf_obj = NaElement('perf-object-get-instances-iter-start')
-            get_perf_obj.child_add(NaElement('objectname', objectname))
             get_perf_obj.child_add(read_counters)
-            out = self.invoke_elem(get_perf_obj)
-        else:
-            out = self.invoke('perf-object-get-instances-iter-start',
-                              'objectname', objectname)
+
+        if instances:
+            insts = NaElement('instances')
+            for inst in instances:
+                insts.child_add(NaElement('instance', inst))
+            get_perf_obj.child_add(insts)
+
+        out = self.invoke_elem(get_perf_obj)
 
         iter_tag = out.child_get_int('tag')
         iter_recs = out.child_get_int('records')
