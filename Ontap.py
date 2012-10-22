@@ -870,6 +870,13 @@ class FlexVol:
 
         return sched
 
+    def get_state(self):
+        """Return state of the volume (online, offline, restricted, etc.)."""
+
+        out = self.filer.invoke('volume-list-info', 'volume', self.name)
+        return out.child_get('volumes').child_get(
+            'volume-info').child_get_string('state')
+
     def get_sv_pri_snap_sched(self):
         """
         Return the snapvault primary snapshot schedule as an array of dicts.
