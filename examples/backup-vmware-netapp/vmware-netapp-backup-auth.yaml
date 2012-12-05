@@ -1,0 +1,11 @@
+filers:
+  - hostname: 'filer02'
+    user: 'vmwsnapvault'
+    passwd: 'secret'
+  - hostname: 'filer01'
+    user: 'vmwsnapvault'
+    passwd: 'secret'
+vcenter:
+  - hostname: 'vc.example.org'
+    user: 'apisnapshot'
+    passwd: 'secret'

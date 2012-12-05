@@ -1,0 +1,6 @@
+datastores:
+  - name: 'filer01_lun01'
+    primary: filer01
+    secondary: filer02
+    pri_vol: esx_1
+    sec_vol: sv_esx_1
