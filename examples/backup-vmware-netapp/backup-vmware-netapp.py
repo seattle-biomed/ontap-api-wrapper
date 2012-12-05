@@ -228,6 +228,11 @@ if __name__ == '__main__':
         if datastore.has_key('secondary'):
             sec_vol = filers[datastore['secondary']].get_volume(
                 datastore['sec_vol'])
+            if sec_vol is False:
+                v_print("Secondary volume %s does not exist on %s!" %
+                        (datastore['sec_vol'], filers[datastore['secondary']]),
+                        1)
+                continue
             v_print("Initiating transfer to %s" % datastore['sec_vol'], 3)
             if not dry_run:
                 sec_vol.snapvault_secondary_snap('sv_daily')
