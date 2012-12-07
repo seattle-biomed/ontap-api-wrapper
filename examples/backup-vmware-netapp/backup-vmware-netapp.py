@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
             # Skip off VMs:
             if vm.get_status() == 'POWERED OFF':
-                v_print("%s is off - will not take VMware snap" % vmx, 2)
+                v_print("%s is off - will not take VMware snap" % vmx, 3)
                 off_vms.append(vmx)
                 continue
             
