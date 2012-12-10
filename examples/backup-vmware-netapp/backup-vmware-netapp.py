@@ -167,8 +167,9 @@ if __name__ == '__main__':
 
             try:
                 vm = servers[vms_by_ds[datastore['name']][vmx]].get_vm_by_path(vmx)
-            except pysphere.resources.vi_exception.VIException:
+            except pysphere.resources.vi_exception.VIException as e:
                 v_print("Failed to get_vm with %s!" % vmx, 1)
+                v_print("Exception detail: %s" % e, 1)
                 v_print("Expected VM to be on host %s" %
                         vms_by_ds[datastore['name']][vmx], 2)
                 v_print("%s will not get a VMware snapshot." % vmx, 2)
