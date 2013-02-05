@@ -231,7 +231,8 @@ if __name__ == '__main__':
                 datastore['sec_vol'])
             if sec_vol is False:
                 v_print("Secondary volume %s does not exist on %s!" %
-                        (datastore['sec_vol'], filers[datastore['secondary']]),
+                        (datastore['sec_vol'],
+                         filers[datastore['secondary']].name),
                         1)
                 continue
             v_print("Initiating transfer to %s" % datastore['sec_vol'], 3)
