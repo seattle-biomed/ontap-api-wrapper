@@ -1,0 +1,7 @@
+filers:
+  - hostname: 'toaster01'
+    user: 'spacechk'
+    passwd: 'changeme'
+  - hostname: 'toaster02'
+    user: 'spacechk'
+    passwd: 'changeme'
